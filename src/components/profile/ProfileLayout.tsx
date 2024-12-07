@@ -4,13 +4,17 @@ import useUserProfile from '@/app/hooks/useUserProfile';
 import ProfileContent from './ProfileContent';
 import ProfileHeader from './ProfileHeader';
 
-export default function ProfileLayout() {
-  const { data: profile } = useUserProfile();
+type ProfileLayoutProps = {
+  username: string;
+};
+
+export default function ProfileLayout({ username }: ProfileLayoutProps) {
+  const { data: user } = useUserProfile(username);
 
   return (
     <div className="space-y-7.5 flex-1 overflow-y-scroll custom-scrollbar">
-      <ProfileHeader profile={profile} />
-      <ProfileContent profile={profile} />
+      <ProfileHeader user={user} />
+      <ProfileContent user={user} />
     </div>
   );
 }

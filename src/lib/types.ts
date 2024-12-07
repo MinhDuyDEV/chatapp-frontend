@@ -1,4 +1,4 @@
-import { SocialPlatform, Visibility } from './enum';
+import { FriendRequestStatus, SocialPlatform, Visibility } from './enum';
 
 export type ErrorServerResponse = {
   response: {
@@ -25,17 +25,22 @@ export type User = {
   username: string;
 };
 
-export type UserProfile = {
-  username: string;
-  avatar: string | null;
-  coverPhoto: string | null;
-  bio: string;
+export type Profile = {
   firstName: string | null;
   lastName: string | null;
-  birthday: string;
-  gender: string;
+  coverPhoto: string | null;
+  bio: string;
+  birthday: string | null;
+  gender: string | null;
   address: string | null;
   socialLinks: SocialLink[] | null;
+};
+
+export type UserProfile = {
+  id: string;
+  username: string;
+  avatar: string | null;
+  profile: Profile;
 };
 
 export type SocialLink = {
@@ -189,4 +194,13 @@ export type RemoveGroupUserMessagePayload = {
 export type GroupParticipantLeftPayload = {
   group: Group;
   userId: string;
+};
+
+export type UserRelationship = {
+  requestId: string;
+  isFollowing: boolean;
+  isFriend: boolean;
+  hasPendingFriendRequest: boolean;
+  pendingFriendRequestType?: 'sent' | 'received';
+  friendRequestStatus: FriendRequestStatus;
 };

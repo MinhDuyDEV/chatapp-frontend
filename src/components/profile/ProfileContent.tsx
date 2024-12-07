@@ -4,13 +4,13 @@ import ProfileIntro from './ProfileIntro';
 import Suggestion from './Suggestion';
 
 interface ProfileContentProps {
-  profile?: UserProfile | null;
+  user?: UserProfile | null;
 }
 
-export default function ProfileContent({ profile }: ProfileContentProps) {
+export default function ProfileContent({ user }: ProfileContentProps) {
   return (
-    <div className="mt-8 p-7.5 grid gap-6 md:grid-cols-[300px_1fr_300px] bg-muted rounded-lg">
-      <ProfileIntro profile={profile} />
+    <div className="mt-8 p-7.5 grid gap-6 md:grid-cols-[300px_1fr_300px] bg-muted/50 rounded-lg">
+      <ProfileIntro user={user} />
       <PostFeed />
       <Suggestion />
     </div>

@@ -12,21 +12,27 @@ import {
 } from '@/components/ui/popover';
 import { useState } from 'react';
 import PhotoUploadModal from '@/components/modals/photo-upload-modal';
-import { UserProfile } from '@/lib/types';
+import { User, UserProfile } from '@/lib/types';
+import Relationship from './Relationship';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface ProfileHeaderProps {
-  profile?: UserProfile | null;
+  user?: UserProfile | null;
 }
 
-export default function ProfileHeader({ profile }: ProfileHeaderProps) {
+export default function ProfileHeader({ user }: ProfileHeaderProps) {
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
   const [coverPhotoModalOpen, setCoverPhotoModalOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const me = queryClient.getQueryData<User>(['me']);
+
+  if (!user) return null;
 
   return (
     <div className="rounded-md shadow pb-7.5">
       <div className="relative">
         <Image
-          src={profile?.coverPhoto || banner}
+          src={user.profile.coverPhoto || banner}
           alt="Cover Photo"
           width={1232}
           height={350}
@@ -45,7 +51,7 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
           <PopoverTrigger asChild>
             <div className="absolute -bottom-16 left-6 rounded-full border-2 border-background cursor-pointer">
               <Image
-                src={profile?.avatar || avatar}
+                src={user.avatar || avatar}
                 alt="Avatar"
                 width={104}
                 height={104}
@@ -72,11 +78,11 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
       <div className="flex justify-between mt-[75px] px-7.5">
         <div>
           <h1 className="text-2xl font-bold">
-            {profile?.firstName} {profile?.lastName}
+            {user.profile?.firstName} {user.profile?.lastName}
           </h1>
-          <p className="text-muted-foreground">{profile?.bio}</p>
+          <p className="text-muted-foreground">{user.profile?.bio}</p>
         </div>
-        <Button variant="outline">Edit basic info</Button>
+        {me?.id !== user.id && <Relationship userId={user.id} />}
       </div>
 
       {avatarModalOpen && (

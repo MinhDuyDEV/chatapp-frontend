@@ -1,5 +1,5 @@
 import axiosInstance from '@/lib/axiosInstance';
-import { User, UserProfile } from '@/lib/types';
+import { Profile, User, UserProfile } from '@/lib/types';
 
 export const getUsers = async () => {
   const response = await axiosInstance.get('/api/users');
@@ -26,7 +26,7 @@ export const uploadAvatar = async (
 
 export const uploadCoverPhoto = async (
   file: File,
-): Promise<Pick<UserProfile, 'coverPhoto'>> => {
+): Promise<Pick<Profile, 'coverPhoto'>> => {
   const formData = new FormData();
   formData.append('file', file);
 
@@ -42,7 +42,9 @@ export const uploadCoverPhoto = async (
   return response.data;
 };
 
-export const getUserProfile = async (): Promise<UserProfile> => {
-  const response = await axiosInstance.get('/api/users/profile');
+export const getUserProfile = async (
+  username: string,
+): Promise<UserProfile> => {
+  const response = await axiosInstance.get(`/api/users/profile/${username}`);
   return response.data;
 };

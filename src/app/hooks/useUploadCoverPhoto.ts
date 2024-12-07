@@ -12,7 +12,7 @@ export default function useUploadCoverPhoto() {
     onSuccess: () => {
       toast.success('Cover photo updated successfully');
       queryClient.invalidateQueries({
-        queryKey: [`detail-${QueryKeyProfile.Profile}`],
+        queryKey: [`${QueryKeyProfile.Profile}`],
       });
     },
     onError: (error: ErrorServerResponse) => {

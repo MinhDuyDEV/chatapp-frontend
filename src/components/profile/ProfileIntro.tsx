@@ -7,41 +7,43 @@ import Link from 'next/link';
 import { getSocialIcon } from '@/lib/utils';
 
 interface ProfileIntroProps {
-  profile?: UserProfile | null;
+  user?: UserProfile | null;
 }
 
-export default function ProfileIntro({ profile }: ProfileIntroProps) {
+export default function ProfileIntro({ user }: ProfileIntroProps) {
   return (
     <Card className="p-4">
       <h2 className="mb-4 text-lg font-semibold">INTRO</h2>
       <div className="space-y-4">
-        {profile?.gender && (
+        {user?.profile?.gender && (
           <div className="flex items-center gap-2">
             <CircleUserRound size={16} />
             <span className="text-sm text-muted-foreground">
-              {profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1)}
+              {user?.profile.gender.charAt(0).toUpperCase() +
+                user?.profile.gender.slice(1)}
             </span>
           </div>
         )}
-        {profile?.birthday && (
+        {user?.profile?.birthday && (
           <div className="flex items-center gap-2">
             <Cake size={16} />
             <span className="text-sm text-muted-foreground">
-              Born {formatDate(new Date(profile.birthday), 'MMMM dd, yyyy')}
+              Born{' '}
+              {formatDate(new Date(user?.profile.birthday), 'MMMM dd, yyyy')}
             </span>
           </div>
         )}
-        {profile?.address && (
+        {user?.profile?.address && (
           <div className="flex items-center gap-2">
             <MapPinHouse size={16} />
             <span className="text-sm text-muted-foreground">
-              From {profile.address}
+              From {user?.profile.address}
             </span>
           </div>
         )}
-        {profile?.socialLinks && profile.socialLinks.length > 0 && (
+        {user?.profile?.socialLinks && user?.profile.socialLinks.length > 0 && (
           <div className="space-y-4">
-            {profile.socialLinks.map((link, index) => (
+            {user?.profile.socialLinks.map((link, index) => (
               <div key={index} className="flex items-center gap-2">
                 {getSocialIcon(link.platform)}
                 <Link

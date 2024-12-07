@@ -29,4 +29,12 @@ export enum QueryKeyFeed {
 
 export enum QueryKeyProfile {
   Profile = 'profile',
+  Relationship = 'relationship',
+}
+
+export enum FriendRequestStatus {
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  REJECTED = 'rejected',
+  NONE = 'none',
 }

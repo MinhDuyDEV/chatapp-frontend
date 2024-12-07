@@ -15,7 +15,7 @@ export default function useUploadAvatar() {
         queryKey: [`${QueryKeyProfile.Profile}`],
       });
       queryClient.invalidateQueries({
-        queryKey: [`detail-${QueryKeyProfile.Profile}`],
+        queryKey: [`${QueryKeyProfile.Profile}`],
       });
     },
     onError: (error: ErrorServerResponse) => {
