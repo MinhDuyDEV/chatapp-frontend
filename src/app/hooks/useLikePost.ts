@@ -1,73 +1,54 @@
-import { QueryKeyFeed } from "@/lib/enum";
-import { Post } from "@/lib/types";
-import { useAuth } from "@/providers/auth-provider";
-import { likePost } from "@/services/posts";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { QueryKeyFeed } from '@/lib/enum';
+import { Post } from '@/lib/types';
+import { useAuth } from '@/providers/auth-provider';
+import { likePost } from '@/services/posts';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const useLikePost = (postId: string) => {
   const { user } = useAuth();
-  if (!user) {
-    throw new Error("User is not authenticated");
-  }
   const queryClient = useQueryClient();
+  if (!user) throw new Error('User is not authenticated');
 
-  return useMutation({
+  const queryKey = [`${QueryKeyFeed.Timeline}:${user.id}`];
+
+  const mutation = useMutation({
     mutationFn: () => likePost(postId),
     onMutate: async () => {
-      // Cancel any ongoing fetches for the post to avoid conflicts
-      await queryClient.cancelQueries({
-        queryKey: [`${QueryKeyFeed.Posts}:${user.id}`],
-      });
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<{ data: Post[] }>(queryKey);
 
-      // Take a snapshot of the previous post data for rollback if needed
-      const previousPosts = queryClient.getQueryData<Post[]>([
-        `${QueryKeyFeed.Posts}:${user.id}`,
-      ]);
+      queryClient.setQueryData<{ data: Post[] }>(queryKey, (old) => {
+        if (!old?.data) return old;
 
-      // Optimistically update the like status in the cache
-      queryClient.setQueryData<Post[]>(
-        [`${QueryKeyFeed.Posts}:${user.id}`],
-        (oldPosts: Post[] = []) =>
-          oldPosts.map((post) =>
+        return {
+          ...old,
+          data: old.data.map((post) =>
             post.id === postId
               ? {
                   ...post,
-                  likes: post.likes.some((like) => like.userId === user.id)
-                    ? post.likes.filter((like) => like.userId !== user.id) // Unlike
-                    : [
-                        ...post.likes,
-                        {
-                          id: Date.now().toString(),
-                          userId: user.id,
-                          username: user.username,
-                          avatar: user.avatar ?? null,
-                          updatedAt: new Date().toISOString(),
-                        },
-                      ], // Like
+                  likesCount: post.isLikedByMe
+                    ? post.likesCount - 1
+                    : post.likesCount + 1,
+                  isLikedByMe: !post.isLikedByMe,
                 }
-              : post
-          )
-      );
+              : post,
+          ),
+        };
+      });
 
-      // Return rollback context if mutation fails
-      return { previousPosts };
+      return { previousData };
     },
-    onError: (_error, _variables, context) => {
-      // Roll back to previous state if there’s an error
-      if (context?.previousPosts) {
-        queryClient.setQueryData(
-          [`${QueryKeyFeed.Posts}:${user.id}`],
-          context.previousPosts
-        );
+    onError: (_, __, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
       }
     },
     onSettled: () => {
-      // Refetch posts to sync with server data
-      queryClient.invalidateQueries({
-        queryKey: [`${QueryKeyFeed.Posts}:${user.id}`],
-      });
+      queryClient.invalidateQueries({ queryKey });
     },
   });
+
+  return { toggleLike: () => mutation.mutate(), isLoading: mutation.isPending };
 };
 
 export default useLikePost;

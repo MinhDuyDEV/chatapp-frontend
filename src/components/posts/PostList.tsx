@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { Loader } from "lucide-react";
-import toast from "react-hot-toast";
-import { useEffect } from "react";
-import PostCard from "./PostCard";
-import useFetchPosts from "@/app/hooks/useFetchPosts";
-import { useAuth } from "@/providers/auth-provider";
-import { useInView } from "react-intersection-observer";
+import { Loader } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useEffect } from 'react';
+import PostCard from './PostCard';
+import { useAuth } from '@/providers/auth-provider';
+import { useInView } from 'react-intersection-observer';
+import useTimelineFollowing from '@/app/hooks/useTimelineFollowing';
 
 const PostList = () => {
   const { user } = useAuth();
@@ -17,12 +17,12 @@ const PostList = () => {
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useFetchPosts({ user });
+  } = useTimelineFollowing({ user });
   const { ref, inView } = useInView();
 
   useEffect(() => {
     if (error) {
-      toast.error("Error loading posts");
+      toast.error('Error loading posts');
     }
   }, [error]);
 
@@ -45,7 +45,7 @@ const PostList = () => {
       {posts?.pages.map((page) =>
         page.data.map((post) => (
           <PostCard key={post.id} post={post} user={user} />
-        ))
+        )),
       )}
 
       {hasNextPage && (

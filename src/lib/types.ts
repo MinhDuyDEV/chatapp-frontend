@@ -100,18 +100,10 @@ export interface Attachment {
   mimetype: string;
 }
 
-export type BaseLikedPostUser = Pick<User, 'username'>;
-
-export type LikedPostUser = BaseLikedPostUser & {
-  userId: string;
-  avatar: string | null;
-};
-
 export type Pagination<T> = {
   data: T[];
   total: number;
   page: number;
-  limit: number;
   totalPages: number;
 };
 
@@ -121,12 +113,11 @@ export type Post = {
   createdAt: string;
   updatedAt: string;
   visibility: Visibility;
-  author: User;
+  author: UserProfile;
   attachments: Attachment[];
-  likes: LikedPostUser[];
-  remainingLikeCount: number;
-  isLikedByCurrentUser: boolean;
-  commentCount: number;
+  likesCount: number;
+  isLikedByMe: boolean;
+  commentsCount: number;
 };
 
 export type Comment = {
@@ -203,4 +194,9 @@ export type UserRelationship = {
   hasPendingFriendRequest: boolean;
   pendingFriendRequestType?: 'sent' | 'received';
   friendRequestStatus: FriendRequestStatus;
+};
+
+export type UsersLikedPost = {
+  user: UserProfile;
+  relationship: UserRelationship;
 };

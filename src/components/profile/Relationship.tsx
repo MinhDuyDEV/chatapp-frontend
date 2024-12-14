@@ -29,7 +29,7 @@ interface RelationshipProps {
 export default function Relationship({ userId }: RelationshipProps) {
   const router = useRouter();
   const { data: relationship } = useRelationship(userId);
-  const { handleFollow, isLoading: isFollowLoading } = useFollow(userId);
+  const { handleFollow, isLoading: isFollowLoading } = useFollow({ userId });
   const {
     handleAcceptRequest,
     handleDeclineRequest,
@@ -39,7 +39,7 @@ export default function Relationship({ userId }: RelationshipProps) {
     isDeclining,
     isCancelingFriend,
     isCancelingFriendRequest,
-  } = useFriendRequest(userId);
+  } = useFriendRequest({ userId });
 
   const handleMessage = () => {
     router.push(`/message/${userId}`);

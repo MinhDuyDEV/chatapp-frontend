@@ -22,7 +22,7 @@ export enum SocialPlatform {
 }
 
 export enum QueryKeyFeed {
-  Posts = 'posts',
+  Timeline = 'timeline',
   UsersLikedPost = 'users-liked-post',
   CommentsPost = 'comments-post',
 }

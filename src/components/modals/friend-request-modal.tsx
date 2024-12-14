@@ -28,7 +28,7 @@ export default function FriendRequestModal({
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const debouncedMessage = useDebounce(message, 300);
-  const { handleSendRequest, isSending } = useFriendRequest(userId);
+  const { handleSendRequest, isSending } = useFriendRequest({ userId });
 
   const handleSubmit = () => {
     handleSendRequest(debouncedMessage);
@@ -46,7 +46,7 @@ export default function FriendRequestModal({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" className="flex items-center gap-2">
+        <Button variant="default" className="flex items-center gap-2 ml-auto">
           <UserPlus size={20} />
           Add Friend
         </Button>

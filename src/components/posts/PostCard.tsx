@@ -1,24 +1,25 @@
-import type { Post, User } from "@/lib/types";
-import Image from "next/image";
-import avatar from "@/assets/avatar.png";
+import type { Post, User } from '@/lib/types';
+import Image from 'next/image';
+import avatar from '@/assets/avatar.png';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { format, formatDistanceToNow } from "date-fns";
-import { VisibilityIcons } from "@/lib/constants";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Heart, MessageCircleMore, Share2 } from "lucide-react";
-import AttachmentGallery from "./AttachmentGallery";
-import useLikePost from "@/app/hooks/useLikePost";
-import { useState } from "react";
-import LikeListModal from "@/components/modals/like-list-modal";
-import CommentListModal from "@/components/modals/comment-list-modal";
-import CustomPostMe from "./CustomPostMe";
-import CustomPost from "./CustomPost";
+} from '@/components/ui/tooltip';
+import { format, formatDistanceToNow } from 'date-fns';
+import { VisibilityIcons } from '@/lib/constants';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Heart, MessageCircleMore, Share2 } from 'lucide-react';
+import AttachmentGallery from './AttachmentGallery';
+import useLikePost from '@/app/hooks/useLikePost';
+import { useState } from 'react';
+import LikeListModal from '@/components/modals/like-list-modal';
+import CommentListModal from '@/components/modals/comment-list-modal';
+import CustomPostMe from './CustomPostMe';
+import CustomPost from './CustomPost';
+import { useRouter } from 'next/navigation';
 
 interface PostCardProps {
   post: Post;
@@ -26,30 +27,10 @@ interface PostCardProps {
 }
 
 const PostCard = ({ post, user }: PostCardProps) => {
-  const { mutate: likePost } = useLikePost(post.id);
+  const { toggleLike, isLoading: isLiking } = useLikePost(post.id);
   const [likeDialogOpen, setLikeDialogOpen] = useState(false);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
-
-  const likeText = (() => {
-    if (!post.likes || post.likes.length === 0) return "";
-
-    if (post.isLikedByCurrentUser) {
-      return (
-        "You" +
-        (post.remainingLikeCount > 0
-          ? ` and ${post.remainingLikeCount} others`
-          : "")
-      );
-    } else {
-      const firstLikeUsername = post.likes[0]?.username;
-      return (
-        firstLikeUsername +
-        (post.remainingLikeCount > 0
-          ? ` and ${post.remainingLikeCount} others`
-          : "")
-      );
-    }
-  })();
+  const router = useRouter();
 
   return (
     <article
@@ -62,13 +43,17 @@ const PostCard = ({ post, user }: PostCardProps) => {
           alt="avatar"
           width={50}
           height={50}
-          className="rounded-full aspect-[1/1] object-cover"
+          className="rounded-full aspect-[1/1] object-cover cursor-pointer"
+          onClick={() => router.push(`/profile/${post.author.username}`)}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-medium text-base text-secondary-foreground">
-              {post?.author?.username}
+            <h3
+              className="font-medium text-base text-secondary-foreground hover:underline cursor-pointer"
+              onClick={() => router.push(`/profile/${post.author.username}`)}
+            >
+              {post?.author?.profile.firstName} {post?.author?.profile.lastName}
             </h3>
             <div className="flex gap-1 items-center">
               <TooltipProvider>
@@ -77,13 +62,13 @@ const PostCard = ({ post, user }: PostCardProps) => {
                     <span className="text-xs text-gray-500">
                       {formatDistanceToNow(new Date(post.createdAt), {
                         addSuffix: true,
-                      }).replace("about ", "")}
+                      }).replace('about ', '')}
                     </span>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs">
                     {format(
                       new Date(post.createdAt),
-                      "EEEE, MMMM do, yyyy 'at' h:mm a"
+                      "EEEE, MMMM do, yyyy 'at' h:mm a",
                     )}
                   </TooltipContent>
                 </Tooltip>
@@ -124,36 +109,41 @@ const PostCard = ({ post, user }: PostCardProps) => {
 
         <div className="mt-4.5 space-y-3.5">
           <div className="flex items-center text-gray-500 text-sm">
-            <strong
-              className="hover:underline cursor-pointer"
-              onClick={() => setLikeDialogOpen(true)}
-            >
-              {likeText && <>{likeText}</>}
-            </strong>
+            {post.likesCount > 0 && (
+              <strong
+                className="hover:underline cursor-pointer flex items-end gap-1"
+                onClick={() => setLikeDialogOpen(true)}
+              >
+                <Heart size={16} className="fill-red-500 text-red-500" />
+                <span className="leading-none">
+                  {post.isLikedByMe &&
+                    post.likesCount > 1 &&
+                    `You and ${post.likesCount - 1} others`}
+                  {post.isLikedByMe && post.likesCount === 1 && 'You'}
+                  {!post.isLikedByMe && post.likesCount}
+                </span>
+              </strong>
+            )}
             <div className="ml-auto flex justify-between gap-2">
               <strong
                 className="hover:underline cursor-pointer"
                 onClick={() => setCommentDialogOpen(true)}
               >
-                {post.commentCount} comments
+                {post.commentsCount} comments
               </strong>
               <span>•</span>
-              <strong>123 shares</strong>
+              <strong>0 shares</strong>
             </div>
           </div>
 
           <Separator />
 
           <div className="flex justify-between">
-            <Button variant="ghost" onClick={() => likePost()}>
+            <Button variant="ghost" onClick={toggleLike} disabled={isLiking}>
               <Heart
-                className={`${
-                  post.isLikedByCurrentUser && "fill-red-500 text-red-500"
-                }`}
+                className={`${post.isLikedByMe && 'fill-red-500 text-red-500'}`}
               />
-              <span
-                className={`${post.isLikedByCurrentUser && "text-red-500"}`}
-              >
+              <span className={`${post.isLikedByMe && 'text-red-500'}`}>
                 Love
               </span>
             </Button>

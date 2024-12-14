@@ -1,14 +1,14 @@
-import { getPosts } from '@/services/posts';
-import { User } from '@/lib/types';
-import { useInfiniteQuery } from '@tanstack/react-query';
 import { QueryKeyFeed } from '@/lib/enum';
+import { User } from '@/lib/types';
+import { getTimelineFollowing } from '@/services/timeline';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
-const useFetchPosts = ({ user }: { user: User | null }) => {
+export default function useTimelineFollowing({ user }: { user: User | null }) {
   return useInfiniteQuery({
-    queryKey: [`${QueryKeyFeed.Timeline}:${user?.id}`, user?.id],
+    queryKey: [`${QueryKeyFeed.Timeline}:${user?.id}`],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await getPosts(pageParam, 10);
-      return response;
+      const data = await getTimelineFollowing(pageParam as number, 10);
+      return data;
     },
     getNextPageParam: (lastPage) => {
       if (lastPage.page < lastPage.totalPages) {
@@ -19,6 +19,4 @@ const useFetchPosts = ({ user }: { user: User | null }) => {
     enabled: !!user,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
-};
-
-export default useFetchPosts;
+}

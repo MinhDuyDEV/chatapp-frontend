@@ -1,47 +1,119 @@
-import { QueryKeyProfile } from '@/lib/enum';
-import { UserRelationship } from '@/lib/types';
+import { QueryKeyFeed, QueryKeyProfile } from '@/lib/enum';
+import { UserRelationship, UsersLikedPost } from '@/lib/types';
 import { followUser, unfollowUser } from '@/services/follows';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-export default function useFollow(userId: string) {
+interface UseFollowProps {
+  userId: string;
+  postId?: string;
+}
+
+interface ErrorContext {
+  previousData?: {
+    relationship?: UserRelationship;
+    usersLikedPost?: unknown;
+  };
+}
+
+const getQueryKeys = (userId: string, postId?: string) => {
+  const keys = [[`${QueryKeyProfile.Relationship}:${userId}`]];
+  if (postId) {
+    keys.push([QueryKeyFeed.UsersLikedPost, postId]);
+  }
+  return keys;
+};
+
+export default function useFollow({ userId, postId }: UseFollowProps) {
   const queryClient = useQueryClient();
+
+  const cancelAllQueries = async () => {
+    const keys = getQueryKeys(userId, postId);
+    await Promise.all(
+      keys.map((key) => queryClient.cancelQueries({ queryKey: key })),
+    );
+  };
+
+  const getPreviousData = () => {
+    return {
+      relationship: queryClient.getQueryData<UserRelationship>([
+        `${QueryKeyProfile.Relationship}:${userId}`,
+      ]),
+      usersLikedPost: postId
+        ? queryClient.getQueryData([QueryKeyFeed.UsersLikedPost, postId])
+        : undefined,
+    };
+  };
+
+  const updateCaches = (isFollowing: boolean) => {
+    // Update relationship cache
+    queryClient.setQueryData<UserRelationship>(
+      [`${QueryKeyProfile.Relationship}:${userId}`],
+      (old) => (old ? { ...old, isFollowing } : undefined),
+    );
+
+    // Update users liked post cache
+    if (postId) {
+      queryClient.setQueriesData<{ pages: { data: UsersLikedPost[] }[] }>(
+        { queryKey: [QueryKeyFeed.UsersLikedPost, postId] },
+        (old) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              data: page.data.map((like) =>
+                like.user.id === userId
+                  ? {
+                      ...like,
+                      relationship: {
+                        ...like.relationship,
+                        isFollowing,
+                      },
+                    }
+                  : like,
+              ),
+            })),
+          };
+        },
+      );
+    }
+  };
+
+  const handleError = (context?: ErrorContext) => {
+    if (context?.previousData?.relationship) {
+      queryClient.setQueryData(
+        [`${QueryKeyProfile.Relationship}:${userId}`],
+        context.previousData.relationship,
+      );
+    }
+    if (context?.previousData?.usersLikedPost && postId) {
+      queryClient.setQueryData(
+        [QueryKeyFeed.UsersLikedPost, postId],
+        context.previousData.usersLikedPost,
+      );
+    }
+  };
+
+  const invalidateQueries = () => {
+    const keys = getQueryKeys(userId, postId);
+    keys.forEach((key) => {
+      queryClient.invalidateQueries({ queryKey: key });
+    });
+  };
 
   const followMutation = useMutation({
     mutationFn: (isFollowing: boolean) =>
       isFollowing ? unfollowUser(userId) : followUser(userId),
     onMutate: async (isFollowing) => {
-      await queryClient.cancelQueries({
-        queryKey: [`${QueryKeyProfile.Relationship}:${userId}`],
-      });
+      await cancelAllQueries();
+      const previousData = getPreviousData();
 
-      const previousRelationship = queryClient.getQueryData<UserRelationship>([
-        `${QueryKeyProfile.Relationship}:${userId}`,
-      ]);
+      updateCaches(!isFollowing);
 
-      queryClient.setQueryData<UserRelationship>(
-        [`${QueryKeyProfile.Relationship}:${userId}`],
-        (old) =>
-          old
-            ? {
-                ...old,
-                isFollowing: !isFollowing,
-              }
-            : undefined,
-      );
-
-      return { previousRelationship };
+      return { previousData };
     },
-    onError: (err, isFollowing, context) => {
-      queryClient.setQueryData(
-        [`${QueryKeyProfile.Relationship}:${userId}`],
-        context?.previousRelationship,
-      );
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: [`${QueryKeyProfile.Relationship}:${userId}`],
-      });
-    },
+    onError: (err, isFollowing, context) => handleError(context),
+    onSettled: invalidateQueries,
   });
 
   const handleFollow = (isFollowing: boolean) => {

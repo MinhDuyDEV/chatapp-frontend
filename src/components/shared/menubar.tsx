@@ -64,25 +64,19 @@ const Menubar = ({ className }: MenubarProps) => {
     }
   };
 
-  const renderMenuItem = (item: (typeof MenuBar)[0]) => {
+  const MenuItemButton = ({ item }: { item: (typeof MenuBar)[0] }) => {
     const Icon = item.icon;
-    const commonButtonProps = {
-      key: item.href,
-      variant: 'ghost' as const,
-      className: cn(
-        'flex items-center justify-start gap-5 px-5 py-3',
-        isActive(item.href) &&
-          'bg-gray-800 text-background hover:bg-gray-800 hover:text-background',
-      ),
-      title: item.title,
-    };
+    const buttonClassName = cn(
+      'flex items-center justify-start gap-5 px-5 py-3 w-full',
+      isActive(item.href) &&
+        'bg-gray-800 text-background hover:bg-gray-800 hover:text-background',
+    );
 
     if (item.href === '/logout') {
       return (
         <Button
-          {...commonButtonProps}
-          key={item.href}
-          className={cn(commonButtonProps.className, 'w-full')}
+          variant="ghost"
+          className={buttonClassName}
           onClick={handleLogoutClick}
         >
           <Icon />
@@ -92,7 +86,7 @@ const Menubar = ({ className }: MenubarProps) => {
     }
 
     return (
-      <Button {...commonButtonProps} key={item.href} asChild>
+      <Button variant="ghost" className={buttonClassName} asChild>
         <Link
           href={getMenuItemHref(item.href)}
           onClick={(event) => handleClick(event, item.href)}
@@ -104,7 +98,15 @@ const Menubar = ({ className }: MenubarProps) => {
     );
   };
 
-  return <div className={className}>{MenuBar.map(renderMenuItem)}</div>;
+  return (
+    <div className={className}>
+      {MenuBar.map((item) => (
+        <div key={item.href}>
+          <MenuItemButton item={item} />
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export default Menubar;
