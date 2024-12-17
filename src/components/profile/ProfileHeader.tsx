@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import avatar from '@/assets/avatar.png';
 import banner from '@/assets/cover-photo.png';
 import { Button } from '@/components/ui/button';
 import { CloudUpload, ImageIcon } from 'lucide-react';
@@ -15,6 +14,7 @@ import PhotoUploadModal from '@/components/modals/photo-upload-modal';
 import { User, UserProfile } from '@/lib/types';
 import Relationship from './Relationship';
 import { useQueryClient } from '@tanstack/react-query';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface ProfileHeaderProps {
   user?: UserProfile | null;
@@ -50,13 +50,12 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
         <Popover>
           <PopoverTrigger asChild>
             <div className="absolute -bottom-16 left-6 rounded-full border-2 border-background cursor-pointer">
-              <Image
-                src={user.avatar || avatar}
-                alt="Avatar"
-                width={104}
-                height={104}
-                className="object-cover aspect-[1/1] rounded-full shadow"
-              />
+              <Avatar className="object-cover aspect-[1/1] shadow h-24 w-24">
+                <AvatarImage src={user.avatar ?? undefined} />
+                <AvatarFallback className="text-3xl">
+                  {user.profile.firstName?.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
             </div>
           </PopoverTrigger>
           <PopoverContent className="w-fit py-1 px-2">

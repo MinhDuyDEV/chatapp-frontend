@@ -1,16 +1,15 @@
-import React from "react";
-import { Ban, Check, Info, Phone, Trash2, Video, Volume2 } from "lucide-react";
-
-import { Button } from "../ui/button";
-import { Separator } from "../ui/separator";
-import PhotoCollapsible from "../messages/photo-collapsible";
-import VideoCollapsible from "../messages/video-collapsible";
-import OtherCollapsible from "../messages/other-collapsible";
-import DocumentCollapsible from "../messages/document-collapsible";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Sheet, SheetContent, SheetHeader, SheetTrigger } from "../ui/sheet";
-import { User } from "@/lib/types";
+import React from 'react';
+import { Ban, Check, Info, Phone, Trash2, Video, Volume2 } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Separator } from '../ui/separator';
+import PhotoCollapsible from '../messages/photo-collapsible';
+import VideoCollapsible from '../messages/video-collapsible';
+import OtherCollapsible from '../messages/other-collapsible';
+import DocumentCollapsible from '../messages/document-collapsible';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Sheet, SheetContent, SheetHeader, SheetTrigger } from '../ui/sheet';
+import { User } from '@/lib/types';
 
 interface IConversationHeaderProps {
   recipient: User | undefined;
@@ -22,10 +21,12 @@ const ConversationHeader = ({ recipient }: IConversationHeaderProps) => {
       <div className="flex items-center gap-4.5">
         <Avatar className="size-12">
           <AvatarImage src={recipient?.avatar || undefined} />
-          <AvatarFallback>CN</AvatarFallback>
+          <AvatarFallback>
+            {recipient?.username.charAt(0).toUpperCase()}
+          </AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
-          <p className="text-base">{recipient?.username || "username"}</p>
+          <p className="text-base">{recipient?.username || 'username'}</p>
           <div className="flex items-center gap-4">
             <span className="text-xs text-foreground/50">Active now</span>
             <span className="size-2 bg-green-500 rounded-full"></span>
@@ -48,13 +49,15 @@ const ConversationHeader = ({ recipient }: IConversationHeaderProps) => {
           <SheetContent className="space-y-7.5">
             <SheetHeader className="py-7.5 flex items-center justify-center bg-gray-50 rounded-2xl">
               <Avatar className="size-20">
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>CN</AvatarFallback>
+                <AvatarImage src={recipient?.avatar} />
+                <AvatarFallback>
+                  {recipient?.username.charAt(0).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div className="mt-5 space-y-2.5 text-center">
                 <div>
-                  <p>Lakshitha Jayasinghe</p>
-                  <span>UI designer</span>
+                  <p>{recipient?.username}</p>
+                  <span>{recipient?.email}</span>
                 </div>
                 <div className="flex items-center gap-4 justify-center">
                   <span className="text-xs text-foreground/50">Active now</span>

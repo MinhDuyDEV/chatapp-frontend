@@ -5,11 +5,11 @@ import {
   GroupMessages,
   Message,
   User,
-} from "./types";
+} from './types';
 
 export const formatConversationMessages = (
   conversationMessages: ConversationMessages,
-  id: string
+  id: string,
 ): Message[] => {
   if (conversationMessages.conversationId === id) {
     return conversationMessages.messages;
@@ -20,7 +20,7 @@ export const formatConversationMessages = (
 
 export const getRecipientFromConversation = (
   conversation?: Conversation,
-  user?: User | null
+  user?: User | null,
 ) => {
   if (!conversation || !user) return null;
 
@@ -31,7 +31,7 @@ export const getRecipientFromConversation = (
 
 export const formatGroupMessages = (
   groupMessages: GroupMessages,
-  groupId: string
+  groupId: string,
 ): GroupMessage[] => {
   if (groupMessages.groupId === groupId) {
     return groupMessages.messages;

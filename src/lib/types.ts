@@ -124,11 +124,7 @@ export type Comment = {
   id: string;
   postId: string;
   content: string;
-  user: {
-    id: string;
-    username: string;
-    avatar: string | null;
-  };
+  user: UserProfile;
   parentCommentId: string | null;
   updatedAt: string;
 };

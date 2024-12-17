@@ -15,7 +15,7 @@ import { useSocket } from '@/providers/socket-provider';
 
 const ConversationPanel = () => {
   const params = useParams<{ conversationId: string }>();
-  const { user } = useAuth();
+  const { user: me } = useAuth();
   const [stateEditing, setStateEditing] = useState<{
     isEditing: boolean;
     message: Message | GroupMessage | null;
@@ -50,15 +50,12 @@ const ConversationPanel = () => {
       console.log('userLeave');
     });
     socket.on('onTypingStart', () => {
-      console.log('onTypingStart: User has started typing...');
       setIsRecipientTyping(true);
     });
     socket.on('onTypingStop', () => {
-      console.log('onTypingStop: User has stopped typing...');
       setIsRecipientTyping(false);
     });
     socket.on('onMessageUpdate', (message) => {
-      console.log('onMessageUpdate received');
       console.log(message);
     });
 
@@ -82,7 +79,7 @@ const ConversationPanel = () => {
     }
     socket.emit('onTypingStart', {
       conversationId: params.conversationId,
-      user,
+      user: me,
     });
     typingTimeout = setTimeout(() => {
       socket.emit('onTypingStop', { conversationId: params.conversationId });
@@ -92,10 +89,10 @@ const ConversationPanel = () => {
   const currentConversation = conversations?.find(
     (conversation) => conversation.id === params.conversationId,
   );
-  if (!user) return null;
+  if (!me) return null;
   const otherParticipant =
     currentConversation &&
-    (currentConversation.creator.id === user.id
+    (currentConversation.creator.id === me.id
       ? currentConversation.recipient
       : currentConversation.creator);
 
@@ -132,7 +129,7 @@ const ConversationPanel = () => {
             conversationMessages,
             params.conversationId,
           )}
-          user={user}
+          user={me}
           onReplyClick={handleReplyClick}
           onEditClick={handleEditClick}
         />

@@ -3,17 +3,17 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import Image from "next/image";
-import avatar from "@/assets/avatar.png";
-import { Comment } from "@/lib/types";
-import { useRef, useState } from "react";
-import { formatDistanceToNow } from "date-fns";
-import useCreateComment from "@/app/hooks/useCreateComment";
-import useGetComments from "@/app/hooks/useGetComments";
-import { Button } from "@/components/ui/button";
-import { SendHorizontal } from "lucide-react";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/dialog';
+import { Comment } from '@/lib/types';
+import { useRef, useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
+import useCreateComment from '@/app/hooks/useCreateComment';
+import useGetComments from '@/app/hooks/useGetComments';
+import { Button } from '@/components/ui/button';
+import { SendHorizontal } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/providers/auth-provider';
 
 interface CommentListModalProps {
   isOpen: boolean;
@@ -42,13 +42,12 @@ const CommentItem = ({
     <div className="flex flex-col">
       {/* Comment itself */}
       <div className="flex items-start gap-3 py-2">
-        <Image
-          src={comment.user.avatar || avatar}
-          alt={comment.user.username}
-          width={36}
-          height={36}
-          className="rounded-full"
-        />
+        <Avatar className="object-cover aspect-[1/1] shadow h-9 w-9">
+          <AvatarImage src={comment.user.avatar ?? undefined} />
+          <AvatarFallback className="text-sm">
+            {comment.user.profile.firstName?.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
         <div className="flex-1">
           <div className="bg-gray-100 p-2 rounded-lg">
             <span className="font-semibold text-sm text-gray-800">
@@ -58,7 +57,7 @@ const CommentItem = ({
               {parentUsername ? (
                 <span className="text-blue-500">@{parentUsername} </span>
               ) : (
-                ""
+                ''
               )}
               {comment.content}
             </p>
@@ -67,7 +66,7 @@ const CommentItem = ({
             <span>
               {formatDistanceToNow(comment.updatedAt, {
                 addSuffix: true,
-              }).replace("about ", "")}
+              }).replace('about ', '')}
             </span>
             <button
               className="text-primary hover:underline"
@@ -121,7 +120,7 @@ const CommentListModal = ({
   onClose,
   postId,
 }: CommentListModalProps) => {
-  const [newComment, setNewComment] = useState("");
+  const [newComment, setNewComment] = useState('');
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const {
@@ -130,21 +129,22 @@ const CommentListModal = ({
     hasNextPage,
     isFetchingNextPage,
   } = useGetComments(postId, null, isOpen);
+  const { user: me } = useAuth();
 
   // Mutation for adding a new comment or reply
   const { mutateAsync: addCommentMutation, isPending } = useCreateComment(
     postId,
     {
-      content: newComment.replace(/^@\w+\s*/, ""),
+      content: newComment.replace(/^@\w+\s*/, ''),
       parentCommentId: replyTo,
-    }
+    },
   );
 
   const handleAddComment = async () => {
     if (newComment.trim()) {
       await addCommentMutation();
     }
-    setNewComment("");
+    setNewComment('');
     setReplyTo(null);
   };
 
@@ -205,20 +205,19 @@ const CommentListModal = ({
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
               >
-                {isFetchingNextPage ? "Loading..." : "View more comments"}
+                {isFetchingNextPage ? 'Loading...' : 'View more comments'}
               </Button>
             </div>
           )}
         </div>
 
         <div className="flex items-center gap-2.5">
-          <Image
-            src={avatar}
-            alt="Avatar"
-            width={48}
-            height={48}
-            className="rounded-full aspect-[1/1] w-10 h-10"
-          />
+          <Avatar className="object-cover aspect-[1/1] h-10 w-10 rounded-full">
+            <AvatarImage src={me?.avatar} />
+            <AvatarFallback className="text-base">
+              {me?.username.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
           <Input
             placeholder="Add a comment..."
             value={newComment}
@@ -232,7 +231,7 @@ const CommentListModal = ({
               }
             }}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleAddComment();
               }

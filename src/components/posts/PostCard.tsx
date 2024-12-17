@@ -7,7 +7,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { format, formatDistanceToNow } from 'date-fns';
 import { VisibilityIcons } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -20,6 +19,7 @@ import CommentListModal from '@/components/modals/comment-list-modal';
 import CustomPostMe from './CustomPostMe';
 import CustomPost from './CustomPost';
 import { useRouter } from 'next/navigation';
+import { formatPostDate, formatPostDetailDate } from '@/lib/utils/dateFormat';
 
 interface PostCardProps {
   post: Post;
@@ -60,16 +60,11 @@ const PostCard = ({ post, user }: PostCardProps) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="text-xs text-gray-500">
-                      {formatDistanceToNow(new Date(post.createdAt), {
-                        addSuffix: true,
-                      }).replace('about ', '')}
+                      {formatPostDate(post.createdAt)}
                     </span>
                   </TooltipTrigger>
                   <TooltipContent className="text-xs">
-                    {format(
-                      new Date(post.createdAt),
-                      "EEEE, MMMM do, yyyy 'at' h:mm a",
-                    )}
+                    {formatPostDetailDate(post.createdAt)}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

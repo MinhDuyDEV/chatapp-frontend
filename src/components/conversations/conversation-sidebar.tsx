@@ -47,7 +47,7 @@ const ConversationSidebar = () => {
   const router = useRouter();
   const params = useParams<{ conversationId: string; groupId: string }>();
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user: me } = useAuth();
   const { activeTab, setActiveTab } = useActiveTabStore();
 
   const { data: conversations } = useQuery<Conversation[]>({
@@ -113,7 +113,7 @@ const ConversationSidebar = () => {
             </div>
           )}
           {conversations.map((conversation: Conversation) => {
-            const recipient = getRecipientFromConversation(conversation, user);
+            const recipient = getRecipientFromConversation(conversation, me);
             return (
               <div
                 className={cn(
@@ -127,9 +127,7 @@ const ConversationSidebar = () => {
                 }
               >
                 <Avatar className="size-10">
-                  <AvatarImage
-                    src={conversation.recipient.avatar || undefined}
-                  />
+                  <AvatarImage src={recipient?.avatar} />
                   <AvatarFallback>
                     {recipient?.username.charAt(0).toUpperCase()}
                   </AvatarFallback>
